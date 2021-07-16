@@ -20,34 +20,30 @@ const styles = theme => ({
   }
 })
 
-const customers = [
-  {
-    id: 1,
-    image: 'http://placeimg.com/64/64/1',
-    name: '나동빈',
-    birthday: '961222',
-    gender: '남자',
-    job: '대학생'
-  },
-  {
-    id: 2,
-    image: 'http://placeimg.com/64/64/2',
-    name: '홍길동',
-    birthday: '971222',
-    gender: '여자',
-    job: '직장인'
-  },
-  {
-    id: 3,
-    image: 'http://placeimg.com/64/64/3',
-    name: '동빈나',
-    birthday: '981222',
-    gender: '남자',
-    job: '프로그래머'
-  }
-]
-
+// 고객데이터 관리
 class App extends Component {
+  // state 값 설정, 변경되는 값
+  state = {
+    customers: ""
+  }
+  // render()->componentDidMount(), 생명주기는 랜더링 준비 완료시 동작 됨
+  componentDidMount() {
+    // 서버 API호출
+    this.callApi()
+      // 성공시 .then() 함수 실행
+      .then(res => this.setState({customers: res}))
+      // 실패시 .catch() 함수 실행
+      .catch(err => console.log(err));      
+  }
+  // callApi(), 비동기 형태로 http://localhost:5000/api/customers 접속 후 json 데이터를 반환
+  callApi = async () => {
+    // 비동기 형태로 /api/customers 데이터를 가져온다.
+    const response = await fetch('/api/customers');
+    // json 데이터로 가져온다.
+    const body = await response.json();
+    return body;
+  }
+
   render() {
     const { classes } = this.props;
     return (
@@ -64,22 +60,10 @@ class App extends Component {
             </TableRow>
           </TableHead>
           <TableBody>
-            {
-              customers.map((c) => {
-                  return(
-                    <Customer
-                        key={c.id}
-                        id={c.id}
-                        image={c.image}
-                        name={c.name}
-                        birthday={c.birthday}
-                        gender={c.gender}
-                        job={c.job}
-                    />
-                  )
-                }
-              ) 
-            }
+            {// this.state.customers 값이 있을경우에만 가져온다.
+              this.state.customers ? this.state.customers.map((c) => {
+                  return( <Customer  key={c.id} id={c.id} image={c.image} name={c.name} birthday={c.birthday} gender={c.gender} job={c.job} />);                  
+              }) : "" }
           </TableBody>          
         </Table>        
       </Paper>      
