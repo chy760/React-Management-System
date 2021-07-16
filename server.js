@@ -1,3 +1,4 @@
+const fs = require('fs');
 const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
@@ -6,40 +7,30 @@ const port = process.env.PORT || 5000;
 app.use(bodyParser.json());
 // url 인코드 설정
 app.use(bodyParser.urlencoded({ extended: true }));
-/*
-app.get('/api/hello', (req, res) => {
-    res.send({message: 'Hello Express!!!'});
-})
-*/
-// http://localhost:5000/api/customers 접속시 json 데이터 반환
+// database 정보 읽어옴
+const data = fs.readFileSync('./database.json');
+// data 파싱
+const conf = JSON.parse(data);
+// mysql 라이브러리 불러옴
+const mysql = require('mysql');
+// DB 연결
+const connection = mysql.createConnection({
+  host: conf.host,
+  user: conf.user,
+  password: conf.password,
+  port: conf.port,
+  database: conf.database
+});
+connection.connect();
+
+// http://localhost:5000/api/customers 접속시 DB/json 데이터 반환
 app.get('/api/customers', (req, res) => {
-    res.send(
-        [
-            {
-              id: 1,
-              image: 'http://placeimg.com/64/64/1',
-              name: '나동빈',
-              birthday: '961222',
-              gender: '남자',
-              job: '대학생'
-            },
-            {
-              id: 2,
-              image: 'http://placeimg.com/64/64/2',
-              name: '홍길동',
-              birthday: '971222',
-              gender: '여자',
-              job: '직장인'
-            },
-            {
-              id: 3,
-              image: 'http://placeimg.com/64/64/3',
-              name: '동빈나',
-              birthday: '981222',
-              gender: '남자',
-              job: '프로그래머'
-            }
-        ]
+  // select query, 파라메터값(err, rows, fields) - rows 전체 데이터
+    connection.query(
+      "SELECT * FROM CUSTOMER_NEW",
+      (err, rows, fields) => {
+        res.send(rows);
+      }
     )
 })
 
