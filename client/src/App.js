@@ -27,11 +27,30 @@ const styles = theme => ({
 
 // 고객데이터 관리
 class App extends Component {
-  // state 값 설정, 변경되는 값
-  state = {
-    customers: "",
-    completed: 0
+
+  // 생성자, state 생성
+  constructor(props) {
+    super(props);
+    this.state = {
+      customer: '',
+      completed: 0
+    }
   }
+
+  // state 초기화 함수
+  stateRefresh = () => {
+    this.setState({
+      customer: '',
+      completed: 0
+    });
+    // 서버 API호출, 고객목록 불러오기
+    this.callApi()
+      // 성공시 .then() 함수 실행
+      .then(res => this.setState({customers: res}))
+      // 실패시 .catch() 함수 실행
+      .catch(err => console.log(err));
+  }
+
   // render()->componentDidMount(), 생명주기는 랜더링 준비 완료시 동작 됨
   componentDidMount() {
     // progress 함수, 0.2초마다 호출
@@ -87,7 +106,7 @@ class App extends Component {
             </TableBody>          
           </Table>        
         </Paper>
-        <CustomerAdd/>
+        <CustomerAdd stateRefresh={this.stateRefresh}/>
       </div>
            
     );

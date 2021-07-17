@@ -39,6 +39,8 @@ class CustomerAdd extends React.Component {
         this.addCustomer()
             .then((response) => {
                 console.log("handleFormSubmit:" + response.data);
+                // 고객목록부분만 새로고침, 고객응답 이후 state 값 초기화
+                this.props.stateRefresh();
             })
         this.setState({
             file: null,
@@ -47,8 +49,7 @@ class CustomerAdd extends React.Component {
             gender: '',
             job: '',
             fileName: ''
-        })
-        window.location.reload();
+        })        
     }
 
     handleFileChange = (e) => {
