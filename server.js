@@ -27,6 +27,7 @@ connection.connect();
 
 // multer 라이브러리 사용
 const multer = require('multer');
+
 // 파일업로드 설정
 const upload = multer({dest: './upload'});
 
@@ -34,7 +35,7 @@ const upload = multer({dest: './upload'});
 app.get('/api/customers', (req, res) => {
   // select query, 파라메터값(err, rows, fields) - rows 전체 데이터
     connection.query(
-      "SELECT * FROM CUSTOMER_NEW",
+      "SELECT * FROM CUSTOMER_NEW WHERE isDeleted = 0",
       (err, rows, fields) => {
         res.send(rows);
         console.log(err);
@@ -48,12 +49,13 @@ app.use("/image", express.static("./upload"));
 
 // DB 추가, 클라이언트가 api(http://localhost:5000/api/customers) post 방식
 app.post('/api/customers', upload.single('image'), (req, res) => {
-  let sql = 'INSERT INTO CUSTOMER_NEW VALUES (null, ?, ?, ?, ?, ?)';
+  let sql = 'INSERT INTO CUSTOMER_NEW VALUES (null, ?, ?, ?, ?, ?, now(), 0)';
   let image = 'http://localhost:5000/image/' + req.file.filename;
   let name = req.body.name;
   let birthday = req.body.birthday;
   let gender = req.body.gender;
   let job = req.body.job;
+  
   // 전송 데이터 debug
   console.log(image);
   console.log(name);
@@ -63,6 +65,7 @@ app.post('/api/customers', upload.single('image'), (req, res) => {
   console.log(sql);
 
   let params = [image, name, birthday, gender, job];
+  
   // connection query 함수를 이용하여 DB 연결
   connection.query(sql, params, 
       (err, rows, fields) => {
@@ -72,6 +75,16 @@ app.post('/api/customers', upload.single('image'), (req, res) => {
           console.log(rows);
       }
   );
+});
+
+// 특정경로id(http://localhost:5000/api/customers/:id)로 접속하면 데이터 수정
+app.delete('/api/customers/:id', (req,res) => {
+  let sql = 'UPDATE CUSTOMER_NEW SET isDeleted = 1 WHERE id = ?';
+  let params = [req.params.id];
+  connection.query(sql, params, 
+    (err, rows, fields) => {
+        res.send(rows);
+    })
 });
 
 app.listen(port, () => console.log(`Listening on port ${port}`));
